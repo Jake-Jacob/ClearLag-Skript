@@ -1,0 +1,71 @@
+# Made by Jake_Jacob SpigotMC: https://www.spigotmc.org/members/jake_jacob.1018658/
+
+on skript start:
+    if {clearlag.time} is not set:
+        set {clearlag.time} to 10
+
+every 1 second in world "world":
+	if {clearlag.time.temp} is 0:
+		if {clearlag.auto} is 1:
+			execute console command "clearlag clear"
+		else:
+			send "&f[&4ClearLag&f]: Clearlag.auto is false, skipping." to console
+	else:
+		send "&f[&4ClearLag&f]: Clearlag.time.temp is not 0, skipping." to console
+
+every 1 minute in world "world":
+	remove 1 from {clearlag.time.temp}
+	if {clearlag.time.temp} is 0:
+		set {clearlag.time.temp} to {clearlag.time}
+		remove 1 from {clearlag.time.temp}
+
+command /clearlag <text> [<text>]:
+	permission: clearlag.clear
+	usage: &f[&4ClearLag&f]: /clearlag help
+	permission message: &f[&4ClearLag&f]: &4You do not have permission!
+	trigger:
+		if arg 1 is "help":
+			if arg 2 is not set:
+				send "&f[&4ClearLag&f]: Commands"
+				send "&f[&4ClearLag&f]: /clearlag help | Shows the commands."
+				send "&f[&4ClearLag&f]: /clearlag auto (on/off) | Enables/disables auto clear."
+				send "&f[&4ClearLag&f]: /clearlag clear | Clears all lag."
+				send "&f[&4ClearLag&f]: /clearlag time (minutes) | Sets the interval for how long until lag is auto cleared."
+				send "&f[&4ClearLag&f]: Page <1/1>"
+			if arg 2 is "1":
+				send "&f[&4ClearLag&f]: Commands"
+				send "&f[&4ClearLag&f]: /clearlag help | Shows the commands."
+				send "&f[&4ClearLag&f]: /clearlag auto (on/off) | Enables/disables auto clear."
+				send "&f[&4ClearLag&f]: /clearlag clear | Clears all lag."
+				send "&f[&4ClearLag&f]: /clearlag time (minutes) | Sets the interval for how long until lag is auto cleared."
+				send "&f[&4ClearLag&f]: Page <1/1>"
+		if arg 1 is "auto":
+			if arg 2 is "on":
+				set {clearlag.auto} to 1
+				send "&f[&4ClearLag&f]: Clearlag will now occur every %{clearlag.time}% minutes."
+			if arg 2 is "off":
+				set {clearlag.auto} to 0
+				send "&f[&4ClearLag&f]: Auto clear is now off!"
+			if arg 2 is not set:
+				send "&f[&4ClearLag&f]: Invalid usage! /clearlag auto (on/off)"
+		if arg 1 is "clear":
+			broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 5"
+			wait 1 second
+			broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 4"
+			wait 1 second
+			broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 3"
+			wait 1 second
+			broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 2"
+			wait 1 second
+			broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 1"
+			wait 1 second
+			loop all dropped items:
+				delete loop-entity
+			broadcast "&f[&4ClearLag&f]: &4Lag has been cleared!"
+		if arg 1 is "time":
+			if arg 2 is not set:
+				send "&f[&4ClearLag&f]: Invalid usage! /clearlag time (minutes)"
+			else:
+				set {clearlag.time} to arg 2
+				set {clearlag.time.temp} to arg 2
+				send "&f[&4ClearLag&f]: Lag will now be automagically cleared every %arg 2% minutes."
