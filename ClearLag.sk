@@ -1,12 +1,32 @@
-# Made by Jake_Jacob SpigotMC: https://www.spigotmc.org/members/jake_jacob.1018658/
+# Made by Jake_Jacob. SpigotMC: https://www.spigotmc.org/members/jake_jacob.1018658/
 
+on chat tab complete:
+    event-string is "/clearlag":
+        add "help" to completions
+        add "auto" to completions
+        add "clear" to completions
+        add "time" to completions
+        add "auto on" to completions
+        add "auto off" to completions
+        add "time 10" to completions
+
+on skript load:
+	load yaml "plugins/ClearLag/config.yml"
+	set {clearlag.time} to yaml value "autotime" from "config"
+	set {clearlag.time.temp} to yaml value "autotime" from "config"
+	set {clearlag.auto} to yaml value "auto" from "config"
+	if {jj.firstload} is not set:
+		set the comments of yaml node "test" from "config" to "Made by Jake_Jacob. SpigotMC: https://www.spigotmc.org/members/jake_jacob.1018658" and "I got jerry pregnant uwu"
+		set yaml value "auto" from "config" to false
+		set yaml value "autotime" from "config" to "10"
+		set {jj.firstload} to 1
 on skript start:
     if {clearlag.time} is not set:
         set {clearlag.time} to 10
 
 every 1 second in world "world":
 	if {clearlag.time.temp} is 0:
-		if {clearlag.auto} is 1:
+		if yaml value "auto" from "config" is true:
 			execute console command "clearlag clear"
 		else:
 			send "&f[&4ClearLag&f]: Clearlag.auto is false, skipping." to console
@@ -20,9 +40,7 @@ every 1 minute in world "world":
 		remove 1 from {clearlag.time.temp}
 
 command /clearlag <text> [<text>]:
-	permission: clearlag.clear
 	usage: &f[&4ClearLag&f]: /clearlag help
-	permission message: &f[&4ClearLag&f]: &4You do not have permission!
 	trigger:
 		if arg 1 is "help":
 			if arg 2 is not set:
@@ -31,6 +49,7 @@ command /clearlag <text> [<text>]:
 				send "&f[&4ClearLag&f]: /clearlag auto (on/off) | Enables/disables auto clear."
 				send "&f[&4ClearLag&f]: /clearlag clear | Clears all lag."
 				send "&f[&4ClearLag&f]: /clearlag time (minutes) | Sets the interval for how long until lag is auto cleared."
+				send "&f[&4ClearLag&f]: /clearlag debug | Sends all the variables so the devs can you help your problem!"
 				send "&f[&4ClearLag&f]: Page <1/1>"
 			if arg 2 is "1":
 				send "&f[&4ClearLag&f]: Commands"
@@ -40,32 +59,45 @@ command /clearlag <text> [<text>]:
 				send "&f[&4ClearLag&f]: /clearlag time (minutes) | Sets the interval for how long until lag is auto cleared."
 				send "&f[&4ClearLag&f]: Page <1/1>"
 		if arg 1 is "auto":
-			if arg 2 is "on":
-				set {clearlag.auto} to 1
-				send "&f[&4ClearLag&f]: Clearlag will now occur every %{clearlag.time}% minutes."
-			if arg 2 is "off":
-				set {clearlag.auto} to 0
-				send "&f[&4ClearLag&f]: Auto clear is now off!"
-			if arg 2 is not set:
-				send "&f[&4ClearLag&f]: Invalid usage! /clearlag auto (on/off)"
-		if arg 1 is "clear":
-			broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 5"
-			wait 1 second
-			broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 4"
-			wait 1 second
-			broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 3"
-			wait 1 second
-			broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 2"
-			wait 1 second
-			broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 1"
-			wait 1 second
-			loop all dropped items:
-				delete loop-entity
-			broadcast "&f[&4ClearLag&f]: &4Lag has been cleared!"
-		if arg 1 is "time":
-			if arg 2 is not set:
-				send "&f[&4ClearLag&f]: Invalid usage! /clearlag time (minutes)"
+			if player has permission "clearlag.autoclear":
+				if arg 2 is "on":
+					set {clearlag.auto} to 1
+					set yaml value "auto" from "config" to true
+					send "&f[&4ClearLag&f]: Clearlag will now occur every %{clearlag.time}% minutes."
+				if arg 2 is "off":
+					set {clearlag.auto} to 0
+					set yaml value "auto" from "config" to false
+					send "&f[&4ClearLag&f]: Auto clear is now off!"
+				if arg 2 is not set:
+					send "&f[&4ClearLag&f]: Invalid usage! /clearlag auto (on/off)"
 			else:
-				set {clearlag.time} to arg 2
-				set {clearlag.time.temp} to arg 2
-				send "&f[&4ClearLag&f]: Lag will now be automagically cleared every %arg 2% minutes."
+				send "&f[&4ClearLag&f]: You are lacking permissions!"
+		if arg 1 is "clear":
+			if player has permission "clearlag.clear":
+				broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 5"
+				wait 1 second
+				broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 4"
+				wait 1 second
+				broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 3"
+				wait 1 second
+				broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 2"
+				wait 1 second
+				broadcast "&f[&4ClearLag&f]: &4Lag is being cleared in 1"
+				wait 1 second
+				loop all dropped items:
+					delete loop-entity
+				broadcast "&f[&4ClearLag&f]: &4Lag has been cleared!"
+		if arg 1 is "time":
+			if player has permission "clearlag.time":
+				if arg 2 is not set:
+					send "&f[&4ClearLag&f]: Invalid usage! /clearlag time (minutes)"
+				else:
+					set {clearlag.time} to arg 2
+					set {clearlag.time.temp} to arg 2
+					send "&f[&4ClearLag&f]: Lag will now be automagically cleared every %arg 2% minutes."
+			else:
+				send "&f[&4ClearLag&f]: You are lacking permissions!"
+		if arg 1 is "debug":
+			send "&f[&4ClearLag &bDebug&f]: clearlag.time: {clearlag.time}"
+			send "&f[&4ClearLag &bDebug&f]: clearlag.time.temp: {clearlag.time.temp}"
+			send "&f[&4ClearLag &bDebug&f]: clearlag.auto: {clearlag.auto}"
